@@ -33,7 +33,7 @@ class rec(object):
 
     def searchcircle(self,imgs,img):#霍夫圆变换 二值化图检测圆不理想 灰度图效果不错仅检测出刻度圆而没有其他干扰
         circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1.5, 100, param1=300, param2=0.7, minRadius=img.shape[0]//4, maxRadius=0) #参数均根据图4微调
-        if(circles.shape!=0):
+        if(circles.size!=0):
             circles = np.uint16(np.around(circles))
             imgc = np.ones([img.shape[0],img.shape[1]])
             circle = np.ones(imgs.shape, dtype="uint8")
@@ -56,19 +56,28 @@ class rec(object):
     def searchline(self,imgs,img):#霍夫线变换 canny图 
         edges = cv.Canny(img, 50, 150)
         # cv.imshow('edges', edges)
-        lines = cv.HoughLines(edges, 1, np.pi/180, 100) #参数对图3 图4效果均不错
-        
-        for line in lines:
-            rho, theta = line[0]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            x1 = int(x0 + 1000 * (-b))
-            y1 = int(y0 + 1000 * (a))
-            x2 = int(x0 - 1000 * (-b))
-            y2 = int(y0 - 1000 * (a))
-            cv.line(imgs, (x1, y1), (x2, y2), (0,0,255), 2)
-        # cv.imshow('', imgs)
-        return imgs
-        
+        lines = cv.HoughLines(edges, 1, np.pi/180, 200)
+        i=200
+        while(lines==None):
+            lines = cv.HoughLines(edges, 1, np.pi/180, i) #参数对图3 图4效果均不错
+            i=i-1
+            if(lines==None): continue
+            else: break
+        if(lines.size!=0):
+            test = np.uint16(np.around(lines))
+            x = np.mean(lines, axis=0)
+            for line in lines:
+                rho, theta = line[0]
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a * rho
+                y0 = b * rho
+                x1 = int(x0 + 1000 * (-b))
+                y1 = int(y0 + 1000 * (a))
+                x2 = int(x0 - 1000 * (-b))
+                y2 = int(y0 - 1000 * (a))
+                cv.line(imgs, (x1, y1), (x2, y2), (0,0,255), 2)
+            # cv.imshow('', imgs)
+            return imgs
+        else:
+            return None
