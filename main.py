@@ -2,14 +2,14 @@ import cv2 as cv
 
 from function import rec
 
-file = 'D:/recognition/train/11.jpg'
+file = 'D:/recognition/train/825.jpg'
 img = cv.imread(file)
 imggray = rec().gray(img)
 imgbinary = rec().binary(imggray)
 imgc = rec().searchcircle(img, imggray)
-if(imgc.size!=0):
+if(imgc is not None):
     imgcl = rec().searchline(imgc, imgc)
-    if(imgcl.size!=0):
+    if(imgcl is not None):
         cv.imshow('main', imgcl)
         cv.waitKey()
     else:
