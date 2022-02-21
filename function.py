@@ -23,7 +23,7 @@ class rec(object):
         return cv.GaussianBlur(img, (3, 3), 0)
 
     def binary(self, img):#二值化
-        ret, th1 = cv.threshold(img, 100, 255, cv.THRESH_BINARY)
+        ret, th1 = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
         ret, th2 = cv.threshold(img, 127, 255, cv.THRESH_BINARY_INV)
         ret, th3 = cv.threshold(img, 127, 255, cv.THRESH_TRUNC)
         ret, th4 = cv.threshold(img, 127, 255, cv.THRESH_TOZERO)
@@ -55,9 +55,9 @@ class rec(object):
 
     def searchline(self,imgs,img):#霍夫线变换 canny图 
         edges = cv.Canny(img, 50, 150)
-        # cv.imshow('edges', edges)
+        cv.imshow('edges', edges)
         lines = cv.HoughLines(edges, 1, np.pi/180, 300)
-        i=200
+        i=300
         while(lines==None):
             lines = cv.HoughLines(edges, 1, np.pi/180, i) #参数对图3 图4效果均不错
             i=i-1
@@ -81,3 +81,23 @@ class rec(object):
             return imgs
         else:
             return None
+    
+    def searchlinepro(self,imgs,img):
+        edges = cv.Canny(img, 50, 150)
+        cv.imshow('', edges)
+        lines = cv.HoughLinesP(edges, 1, np.pi/180, 200, minLineLength=50)
+        # for line in lines:
+        #     cv.line(imgs, (line[0][0],line[0][1]), (line[0][2],line[0][3]), (0,0,255),2)
+        i=200
+        while(lines is None):
+            lines = cv.HoughLinesP(edges, 1, np.pi/180, i, minLineLength=img.shape[0]//6) #参数对图3 图4效果均不错
+            i=i-1
+            if(lines is None): continue
+            else: break
+        cv.line(imgs, (lines[0][0][0], lines[0][0][1]), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
+        return imgs
+
+    def searchoutline(self,imgs,img):
+        edges = cv.Canny(img, 50, 150)
+        contours, hierarchy = cv.findContours(edges, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        cv.drawContours(imgs, contours, -1, (0,255,0), 3)

@@ -6,9 +6,11 @@ file = './train/111.jpg'
 img = cv.imread(file)
 imggray = rec().gray(img)
 imgbinary = rec().binary(imggray)
+# cv.imshow('imgbinary', imgbinary)
+test = rec().searchoutline(img, imggray)
 imgc = rec().searchcircle(img, imggray)
 if(imgc is not None):
-    imgcl = rec().searchline(imgc, imgc)
+    imgcl = rec().searchlinepro(imgc, imgc)
     if(imgcl is not None):
         cv.imshow('main', imgcl)
         cv.waitKey()
