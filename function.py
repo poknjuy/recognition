@@ -63,7 +63,7 @@ class rec(object):
             i=i-1
             if(lines is None): continue
             else: break
-        if(lines.size!=0):
+        if(lines.size != 0):
             test = np.uint16(np.around(lines))
             x = np.mean(lines, axis=0)
             for line in lines:
@@ -84,20 +84,31 @@ class rec(object):
     
     def searchlinepro(self,imgs,img):
         edges = cv.Canny(img, 50, 150)
-        cv.imshow('', edges)
+        # cv.imshow('', edges)
         lines = cv.HoughLinesP(edges, 1, np.pi/180, 200, minLineLength=50)
         # for line in lines:
         #     cv.line(imgs, (line[0][0],line[0][1]), (line[0][2],line[0][3]), (0,0,255),2)
         i=200
         while(lines is None):
-            lines = cv.HoughLinesP(edges, 1, np.pi/180, i, minLineLength=img.shape[0]//6) #参数对图3 图4效果均不错
+            lines = cv.HoughLinesP(edges, 1, np.pi/180, i, minLineLength=0) #参数对图3 图4效果均不错
             i=i-1
             if(lines is None): continue
             else: break
-        cv.line(imgs, (lines[0][0][0], lines[0][0][1]), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
-        return imgs
+            if (i < 0):
+                return None
+        if (lines.size != 0):
+            midx = midy = img.shape[0]//2
+            if (((lines[0][0][2] - midx) ^ 2 + (lines[0][0][3] - midy) ^ 2) > ((lines[0][0][0] - midx) ^ 2 + (lines[0][0][1] - midy) ^ 2)):
+                cv.line(imgs, (midx, midy), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
+            else:
+                cv.line(imgs, (midx, midy), (lines[0][0][0], lines[0][0][1]), (0,0,255), 2)
+            # cv.line(imgs, (lines[0][0][0], lines[0][0][1]), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
+            return imgs
+        else:
+            return None
+        
 
     def searchoutline(self,imgs,img):
         edges = cv.Canny(img, 50, 150)
         contours, hierarchy = cv.findContours(edges, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-        cv.drawContours(imgs, contours, -1, (0,255,0), 3)
+        cv.drawContours(imgs, contours, -1, (0,255,0), 1)

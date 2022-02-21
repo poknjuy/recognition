@@ -2,7 +2,7 @@ import cv2 as cv
 
 from function import rec
 
-file = './train/111.jpg'
+file = './train/832.jpg'
 img = cv.imread(file)
 imggray = rec().gray(img)
 imgbinary = rec().binary(imggray)
