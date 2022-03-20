@@ -4,6 +4,7 @@ from function import rec
 
 train1size = 149
 train2size = 180
+train4size = 10
 for num in range(1, 2):
     with open('./train/train2/data.txt', "r") as f:
         # for data in f.readlines():
