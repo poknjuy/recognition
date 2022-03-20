@@ -148,10 +148,22 @@ class rec(object):
         return edgescopy
 
     def searchminmax(self, img):
-        
+        # cv.imshow('0', img)
         img = cv.dilate(img, cv.getStructuringElement(cv.MORPH_RECT, (3, 3)), 5)
-        img = cv.erode(img, cv.getStructuringElement(cv.MORPH_RECT, (3, 3)), 9)
+        img = cv.erode(img, cv.getStructuringElement(cv.MORPH_RECT, (3, 3)), 5)
+        cv.imshow('0', img)
+        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1.5, 100, param1=300, param2=0.7, minRadius=img.shape[0]//4, maxRadius=0) #参数均根据图4微调
+        circles = np.uint16(np.around(circles))
+        circle = np.ones(img.shape, dtype="uint8")
+        circle = circle * 255
+        cv.circle(circle, (circles[0, 0, 0], circles[0, 0, 1]), circles[0, 0, 2] - 9, 0, -1)
+        circle = cv.bitwise_not(circle)
+        cv.circle(circle, (circles[0, 0, 0], circles[0, 0, 1]), circles[0, 0, 2] - 30, 0, -1)
+        
+        # circle = cv.bitwise_not(circle)
+        img = cv.bitwise_and(img, circle)
         cv.imshow('origin', img)
+        # cv.imshow('circle', circle)
         # while(lines==None):
         #     lines = cv.HoughLines(img, 1, np.pi/180, i) #参数对图3 图4效果均不错
         #     i=i-1
@@ -163,7 +175,7 @@ class rec(object):
         # edges = cv.Canny(img, 50, 150)
         # cv.imshow('', edges)
         # img = cv.Canny(img, 50, 150)
-        lines = cv.HoughLinesP(img, 1, np.pi/180, 10, minLineLength=30)
+        lines = cv.HoughLinesP(img, 1, np.pi/180, 10, minLineLength=8)
         # for line in lines:
         #     cv.line(imgs, (line[0][0],line[0][1]), (line[0][2],line[0][3]), (0,0,255),2)
         # i=200
@@ -183,7 +195,7 @@ class rec(object):
             
         if (lines is not None):
             for line in lines:
-                cv.line(white, (line[0][0], line[0][1]), (line[0][2], line[0][3]), (0,0,255), 2)
+                # cv.line(white, (line[0][0], line[0][1]), (line[0][2], line[0][3]), (0,0,255), 2)
                 # cv.imshow('white', white)
                 midy = img.shape[0]//2
                 midx = img.shape[1]//2
@@ -198,10 +210,10 @@ class rec(object):
                 if (d <= 99999):
                     if (((line[0][2] - midx) ^ 2 + (line[0][3] - midy) ^ 2) > ((line[0][0] - midx) ^ 2 + (line[0][1] - midy) ^ 2)):
                         print()
-                        # cv.line(white, (midx, midy), (line[0][2], line[0][3]), (0,0,255), 2)
+                        cv.line(white, (midx, midy), (line[0][2], line[0][3]), (0,0,255), 2)
                     else: 
                         print()
-                        # cv.line(white, (midx, midy), (line[0][0], line[0][1]), (0,0,255), 2)
+                        cv.line(white, (midx, midy), (line[0][0], line[0][1]), (0,0,255), 2)
                     # cv.line(imgs, (lines[0][0][0], lines[0][0][1]), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
                 else: continue
                 # cv.imshow('white', white)
