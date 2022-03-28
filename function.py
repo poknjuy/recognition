@@ -1,4 +1,5 @@
 import cmath
+import math
 import os
 
 import cv2 as cv
@@ -32,7 +33,8 @@ class rec(object):
         return th1
 
     def searchcircle(self,imgs,img):#霍夫圆变换 二值化图检测圆不理想 灰度图效果不错仅检测出刻度圆而没有其他干扰
-        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1.5, 100, param1=300, param2=0.7, minRadius=img.shape[0]//4, maxRadius=0) #参数均根据图4微调
+        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1.5, 100, param1=300, param2=0.55, minRadius=img.shape[0]//4, maxRadius=0) #参数均根据图4微调
+        # print(Pointmin)
         if(circles is not None):
             circles = np.uint16(np.around(circles))
             imgc = np.ones([img.shape[0],img.shape[1]])
@@ -42,6 +44,8 @@ class rec(object):
             imgs = cv.bitwise_or(imgs, circle)
             # cv.imshow(' ', imgs)
             for i in circles[0,:]:
+                global circlecenter
+                circlecenter = (i[0], i[1])
                 cv.circle(imgs,(i[0],i[1]),i[2],(0,255,0), 2)
                 cv.circle(imgs, (i[0],i[1]), 2, (0,0,255), 2)
             # cv.imshow('searchcircle', img)
@@ -49,6 +53,10 @@ class rec(object):
                 cv.circle(imgc,(i[0],i[1]),i[2],(0,255,0), 2)
                 cv.circle(imgc, (i[0],i[1]), 2, (0,0,255), 2)
             # cv.imshow('circle', imgc)
+            imgtest = imgs.copy()
+            cv.line(imgtest, circlecenter, Pointmin, (255, 0, 0), 2)
+            # cv.line(imgtest, circlecenter, pointmax, (255, 0, 0), 2)
+            cv.imshow('imgtest', imgtest)
             return imgs
         else:
             return None
@@ -108,10 +116,13 @@ class rec(object):
         if (lines.size != 0):
             midy = img.shape[0]//2
             midx = img.shape[1]//2
+            global pointline
             if (((lines[0][0][2] - midx) ^ 2 + (lines[0][0][3] - midy) ^ 2) > ((lines[0][0][0] - midx) ^ 2 + (lines[0][0][1] - midy) ^ 2)):
-                cv.line(imgs, (midx, midy), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
+                pointline = (lines[0][0][2], lines[0][0][3])
+                cv.line(imgs, circlecenter, (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
             else:
-                cv.line(imgs, (midx, midy), (lines[0][0][0], lines[0][0][1]), (0,0,255), 2)
+                pointline = (lines[0][0][0], lines[0][0][1])
+                cv.line(imgs, circlecenter, (lines[0][0][0], lines[0][0][1]), (0,0,255), 2)
             # cv.line(imgs, (lines[0][0][0], lines[0][0][1]), (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
             return imgs
         else:
@@ -125,7 +136,7 @@ class rec(object):
         edges = cv.dilate(edges, cv.getStructuringElement(cv.MORPH_RECT, (1, 1)), 1)
         
         contours, hierarchy = cv.findContours(edges, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-        cv.drawContours(imgs, contours, -1, (0,255,0), 1)
+        # cv.drawContours(imgs, contours, -1, (0,255,0), 1)
         
         n = len(contours)
         cv_contours = []
@@ -140,9 +151,9 @@ class rec(object):
         edges = cv.erode(edges, cv.getStructuringElement(cv.MORPH_RECT, (1, 1)), 5)
         # edges = cv.ximgproc.thinning(edges, THINNING_ZHANGSUEN)
         # edges = rec.searchline(self, edges, edges)
-        cv.imshow('return', edgescopy)
-        edges = rec.searchminmax(self, edges)
-        cv.imshow('test', edges)
+        # cv.imshow('return', edgescopy)
+        # edges = rec.searchminmax(self, edges)
+        # cv.imshow('test', edges)
         
 
         return edgescopy
@@ -221,3 +232,73 @@ class rec(object):
             return img
         else:
             return None
+
+    def searchmax(self):
+        img = cv.imread('./train/train2/1.jpg')
+        img = cv.resize(img, (390, 390))
+        imgtem0 = cv.imread('./train/train2/template0.jpg')
+        imgtem0 = cv.cvtColor(imgtem0, cv.COLOR_RGB2GRAY)
+        w0, h0 = imgtem0.shape[::-1]
+        imgtem25 = cv.imread('./train/train2/template25.jpg')
+        imgtem25 = cv.cvtColor(imgtem25, cv.COLOR_RGB2GRAY)
+        w25, h25 = imgtem25.shape[::-1]
+        imgtem = img.copy()
+        imgtem = cv.cvtColor(imgtem, cv.COLOR_RGB2GRAY)
+        res0 = cv.matchTemplate(imgtem, imgtem0, cv.TM_CCOEFF_NORMED)
+        min_val0, max_val0, min_loc0, max_loc0 = cv.minMaxLoc(res0)
+        top_left0 = max_loc0
+        bottom_right0 = (top_left0[0] + w0, top_left0[1] + h0)
+        cv.rectangle(imgtem,top_left0, bottom_right0, 255, 2)
+        res25 = cv.matchTemplate(imgtem, imgtem25, cv.TM_CCOEFF_NORMED)
+        min_val25, max_val25, min_loc25, max_loc25 = cv.minMaxLoc(res25)
+        top_left25 = max_loc25
+        bottom_right25 = (top_left25[0] + w25, top_left25[1] + h25)
+        cv.rectangle(imgtem,top_left25, bottom_right25, 255, 2)
+        # cv.line(imgtem, top_left0, bottom_right0, (0, 0, 255))
+        
+        global pointmin, pointmax
+        pointmin = (top_left0[0], top_left0[1]+h0)
+        pointmax = (bottom_right25)
+
+        cv.line(imgtem, pointmin, pointmax, (0, 0, 255))
+        cv.imshow('template', imgtem)
+
+    def searchnow(self, img):
+        imgtem0 = cv.imread('./train/train2/template0.jpg')
+        imgtem0 = cv.cvtColor(imgtem0, cv.COLOR_RGB2GRAY)
+        w0, h0 = imgtem0.shape[::-1]
+        imgtem = img.copy()
+        imgtem = cv.cvtColor(imgtem, cv.COLOR_RGB2GRAY)
+        res0 = cv.matchTemplate(imgtem, imgtem0, cv.TM_CCOEFF_NORMED)
+        min_val0, max_val0, min_loc0, max_loc0 = cv.minMaxLoc(res0)
+        top_left0 = max_loc0
+        bottom_right0 = (top_left0[0] + w0, top_left0[1] + h0)
+        cv.rectangle(imgtem,top_left0, bottom_right0, (0, 0, 255), 2)
+        global Pointmin
+        Pointmin = (top_left0[0], top_left0[1]+h0)
+        cv.imshow('template', imgtem)
+
+    def maxrange(self):
+        k1 = (circlecenter[1] - pointmin[1]) / (circlecenter[0] - pointmin[0])
+        k2 = (circlecenter[1] - pointmax[1]) / (circlecenter[0] - pointmax[0])
+        angletest = abs((k1 - k2) / (1 + k1 * k2))
+        angletest = math.atan(angletest)
+        angletest = 180 * angletest / math.pi
+        global anglemax
+        anglemax = 360 - angletest
+        # print('anglemax:' + str(anglemax))
+
+    def calculation(self, num):
+        print(circlecenter, Pointmin, pointline)
+        k1 = (circlecenter[1] - Pointmin[1]) / (circlecenter[0] - Pointmin[0])
+        k2 = (circlecenter[1] - pointline[1]) / (circlecenter[0] - pointline[0])
+        angletest = abs((k1 - k2) / (1 + k1 * k2))
+        angletest = math.atan(angletest)
+        angletest = 180 * angletest / math.pi
+        global anglenow
+        anglenow = angletest
+        print('anglenow:' + str(anglenow))
+        print('anglemax:' + str(anglemax))
+        global ans
+        ans = 25 * anglenow / anglemax
+        print('ans' + str(num) + ': ' + str(ans))
