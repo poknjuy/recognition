@@ -56,7 +56,7 @@ class rec(object):
             imgtest = imgs.copy()
             cv.line(imgtest, circlecenter, Pointmin, (255, 0, 0), 2)
             # cv.line(imgtest, circlecenter, pointmax, (255, 0, 0), 2)
-            cv.imshow('imgtest', imgtest)
+            # cv.imshow('imgtest', imgtest)
             return imgs
         else:
             return None
@@ -261,7 +261,9 @@ class rec(object):
         pointmax = (bottom_right25)
 
         cv.line(imgtem, pointmin, pointmax, (0, 0, 255))
-        cv.imshow('template', imgtem)
+        # cv.imshow('template', imgtem)
+        global list
+        list = []
 
     def searchnow(self, img):
         imgtem0 = cv.imread('./train/train2/template0.jpg')
@@ -276,7 +278,7 @@ class rec(object):
         cv.rectangle(imgtem,top_left0, bottom_right0, (0, 0, 255), 2)
         global Pointmin
         Pointmin = (top_left0[0], top_left0[1]+h0)
-        cv.imshow('template', imgtem)
+        # cv.imshow('template', imgtem)
 
     def maxrange(self):
         k1 = (circlecenter[1] - pointmin[1]) / (circlecenter[0] - pointmin[0])
@@ -289,7 +291,7 @@ class rec(object):
         # print('anglemax:' + str(anglemax))
 
     def calculation(self, num):
-        print(circlecenter, Pointmin, pointline)
+        # print(circlecenter, Pointmin, pointline)
         k1 = (circlecenter[1] - Pointmin[1]) / (circlecenter[0] - Pointmin[0])
         k2 = (circlecenter[1] - pointline[1]) / (circlecenter[0] - pointline[0])
         angletest = abs((k1 - k2) / (1 + k1 * k2))
@@ -297,8 +299,17 @@ class rec(object):
         angletest = 180 * angletest / math.pi
         global anglenow
         anglenow = angletest
-        print('anglenow:' + str(anglenow))
-        print('anglemax:' + str(anglemax))
+        # print('anglenow:' + str(anglenow))
+        # print('anglemax:' + str(anglemax))
         global ans
-        ans = 25 * anglenow / anglemax
-        print('ans' + str(num) + ': ' + str(ans))
+        ans = 50 * anglenow / anglemax + 0
+        finalans = ans * 0.5
+        print('finalans' + str(num) + ': ' + str(finalans))
+
+    def loss(self):
+        list.append(abs((ans - 12.5) / 12.5))
+        np.array(list)
+        np.mean(list)
+        # print(list)
+        print(np.mean(list))
+        

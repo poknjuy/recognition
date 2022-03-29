@@ -36,7 +36,8 @@ for num in range(1, 181):
                     if(imgcl is not None):
                         # print('good')                            
                         rec().calculation(num)
-                        cv.imshow('main' + str(num), imgcl)
+                        rec().loss()
+                        # cv.imshow('main' + str(num), imgcl)
                        # cv.waitKey()
                     else:
                         print('error:' + str(num) + ' false no line')
@@ -48,7 +49,7 @@ for num in range(1, 181):
                 print('read file error')
             
 cv.waitKey()
-print(errorcirlce)
+print('errorcirlce:' + str(errorcirlce))
 # rec().searchline(imggray)
 
 # cv.imwrite('G:/recognition/result.jpg', img)
