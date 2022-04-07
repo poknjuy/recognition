@@ -290,6 +290,23 @@ class rec(object):
         anglemax = 360 - angletest
         # print('anglemax:' + str(anglemax))
 
+    def calculationuser(self):
+        # print(circlecenter, Pointmin, pointline)
+        k1 = (circlecenter[1] - Pointmin[1]) / (circlecenter[0] - Pointmin[0])
+        k2 = (circlecenter[1] - pointline[1]) / (circlecenter[0] - pointline[0])
+        angletest = abs((k1 - k2) / (1 + k1 * k2))
+        angletest = math.atan(angletest)
+        angletest = 180 * angletest / math.pi
+        global anglenow
+        anglenow = angletest
+        # print('anglenow:' + str(anglenow))
+        # print('anglemax:' + str(anglemax))
+        global ans
+        ans = 50 * anglenow / anglemax + 0
+        finalans = ans * 0.5
+        print('finalans' + str() + ': ' + str(finalans))
+        return finalans
+
     def calculation(self, num):
         # print(circlecenter, Pointmin, pointline)
         k1 = (circlecenter[1] - Pointmin[1]) / (circlecenter[0] - Pointmin[0])
@@ -305,6 +322,7 @@ class rec(object):
         ans = 50 * anglenow / anglemax + 0
         finalans = ans * 0.5
         print('finalans' + str(num) + ': ' + str(finalans))
+        return finalans
 
     def loss(self):
         list.append(abs((ans - 12.5) / 12.5))

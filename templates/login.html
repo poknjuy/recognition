@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>登录</title>
+    </head>
+    <body>
+        <h1>欢迎使用</h1>
+        <form action="/login/" method="post">
+            用户：<input type="text" placeholder="用户名" name="username">
+            密码：<input type="password" placeholder="密码" name="password">
+            <input type="submit" value="登录">
+            <span style="color: red;">{{ errMessages }}</span>
+        </form>
+    </body>
+</html>
