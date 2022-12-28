@@ -12,25 +12,27 @@ class rec(object):
         self
 
     def gray(self, img):#BGR转灰度
+        # cv.imwrite('exmgray.jpg', cv.cvtColor(img, cv.COLOR_BGR2GRAY))
         return cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
     def medianfliter(self, img):#中值滤波
         return cv.medianBlur(img, 3)
     
     def bilateralfliter(self, img):#双边滤波
-        return cv.bilateralFilter(img, 9, 50, 50)
+        return cv.bilateralFilter(img, 7, 25, 25)
 
     def gaussianfliter(self, img):#高斯滤波
         return cv.GaussianBlur(img, (3, 3), 0)
 
     def binary(self, img):#二值化
+        img = cv.bilateralFilter(img, 7, 150, 150)
         ret, th1 = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
         ret, th2 = cv.threshold(img, 127, 255, cv.THRESH_BINARY_INV)
         ret, th3 = cv.threshold(img, 127, 255, cv.THRESH_TRUNC)
         ret, th4 = cv.threshold(img, 127, 255, cv.THRESH_TOZERO)
         ret, th5 = cv.threshold(img, 127, 255, cv.THRESH_TOZERO_INV)
-        th6 = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 999, 0)
-        return th1
+        th6 = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 7, 0.0)
+        return th6
 
     def searchcircle(self,imgs,img):#霍夫圆变换 二值化图检测圆不理想 灰度图效果不错仅检测出刻度圆而没有其他干扰
         circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1.5, 100, param1=300, param2=0.55, minRadius=img.shape[0]//4, maxRadius=0) #参数均根据图4微调
@@ -117,7 +119,7 @@ class rec(object):
             midy = img.shape[0]//2
             midx = img.shape[1]//2
             global pointline
-            if (((lines[0][0][2] - midx) ^ 2 + (lines[0][0][3] - midy) ^ 2) > ((lines[0][0][0] - midx) ^ 2 + (lines[0][0][1] - midy) ^ 2)):
+            if (((lines[0][0][2] - midx) ^ 2 + (lines[0][0][3] - midy) ^ 2) > ((lines[0][0][0] - midx) ^ 2 + (lines[0][0][1] - midy) ^ 2)):# ^是按位异或并不是平方
                 pointline = (lines[0][0][2], lines[0][0][3])
                 cv.line(imgs, circlecenter, (lines[0][0][2], lines[0][0][3]), (0,0,255), 2)
             else:
@@ -234,8 +236,8 @@ class rec(object):
             return None
 
     def searchmax(self):
-        img = cv.imread('./train/train2/1.jpg')
-        img = cv.resize(img, (390, 390))
+        img = cv.imread('./train/train2/1.jpg') #train2 1   train1 28   train3 44
+        img = cv.resize(img, (390, 390)) #train2 390 390 train3 370 370
         imgtem0 = cv.imread('./train/train2/template0.jpg')
         imgtem0 = cv.cvtColor(imgtem0, cv.COLOR_RGB2GRAY)
         w0, h0 = imgtem0.shape[::-1]
@@ -278,7 +280,7 @@ class rec(object):
         cv.rectangle(imgtem,top_left0, bottom_right0, (0, 0, 255), 2)
         global Pointmin
         Pointmin = (top_left0[0], top_left0[1]+h0)
-        # cv.imshow('template', imgtem)
+        cv.imshow('templatenow', imgtem)
 
     def maxrange(self):
         k1 = (circlecenter[1] - pointmin[1]) / (circlecenter[0] - pointmin[0])
@@ -303,7 +305,7 @@ class rec(object):
         # print('anglemax:' + str(anglemax))
         global ans
         ans = 50 * anglenow / anglemax + 0
-        finalans = ans * 0.5
+        finalans = ans * 0.5 + 1.0
         print('finalans' + str() + ': ' + str(finalans))
         return finalans
 
@@ -319,15 +321,43 @@ class rec(object):
         # print('anglenow:' + str(anglenow))
         # print('anglemax:' + str(anglemax))
         global ans
-        ans = 50 * anglenow / anglemax + 0
-        finalans = ans * 0.5
+        ans = 49 * anglenow / anglemax + 0    # train2
+        # ans = 32 * anglenow / anglemax   # train1
+        # ans = 50 * anglenow / anglemax 
+        finalans = ans * 0.5 + 0.5
         print('finalans' + str(num) + ': ' + str(finalans))
         return finalans
 
-    def loss(self):
-        list.append(abs((ans - 12.5) / 12.5))
+    def loss(self, data):
+        global list
+        list.append(abs((ans * 0.5 +1.0 - data) / data))
         np.array(list)
         np.mean(list)
         # print(list)
+        
         print(np.mean(list))
+
+    def figure(self):
+        plt.figure(figsize=(6.4, 4.8), dpi=100)
+        x = range(82) #train2 171 train3 45 train1 82
+        y = np.array(list)
+        plt.ylim(0, 1)
+        plt.plot(x, y)
+        plt.show()
+
+    def timesum(self, time_sum):
+        global list
+        list.append(time_sum/2)
+        np.array(list)
+        print(time_sum)
+        print(np.mean(list))
+
+    def figuretime(self):
+        plt.figure(figsize=(6.4, 4.8), dpi=100)
+        x = range(45) #train2 171 train3 45
+        y = np.array(list)
+        plt.ylim(0, 2)
+        plt.plot(x, y)
+        plt.show()
+
         

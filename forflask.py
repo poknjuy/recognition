@@ -41,6 +41,7 @@ class myuse(object):
                             if(imgcl is not None):
                                 # print('good')                            
                                 ret = rec().calculationuser()
+                                cv.imwrite('G:/recognition/static/uploads/result.jpg', imgcl)
                                 # rec().loss()
                                 # cv.imshow('main' + str(num), imgcl)
                             # cv.waitKey()

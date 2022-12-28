@@ -4,9 +4,9 @@ from flask import Flask, flash, redirect, render_template, request, url_for, sen
 from markupsafe import escape
 from werkzeug.utils import secure_filename
 
-import forflask
-import function
-import main
+# import forflask
+# import function
+# import main
 
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'jpg'}
@@ -56,8 +56,11 @@ def uploaded(filename):
 @app.route('/recognition/<filename>')
 def recognition(filename):
     print(filename)
-    filepath = 'D:/recognition/uploads/' + filename
-    return render_template('recognition.html', ans = forflask.myuse().forrec(filepath))
+    filepath = 'G:/recognition/uploads/' + filename #注意路径
+    if forflask.myuse().forrec(filepath)<=7.0:
+        return render_template('recognition.html', ans = round(forflask.myuse().forrec(filepath), 2), messages="无异常")
+    else:
+        return render_template('recognition.html', ans = round(forflask.myuse().forrec(filepath), 2), messages="警告")
 
 @app.route('/login2/')
 def login2():

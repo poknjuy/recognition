@@ -5,11 +5,30 @@
         <title>登录</title>
     </head>
     <body>
-        <h1>欢迎使用</h1>
+        <!-- <h1>欢迎使用仪器仪表自动读取系统</h1> -->
+        <h1>欢迎注册电力生产风险预警系统</h1>
         <form action="/login/" method="post">
-            用户：<input type="text" placeholder="用户名" name="username">
-            密码：<input type="password" placeholder="密码" name="password">
-            <input type="submit" value="登录">
+            注册用户名：<input type="text" placeholder="用户名" name="username">
+            <!-- 密码：<input type="password" placeholder="密码" name="password"> -->
+            
+            <!-- <input type="submit" value="登录">
+            <input type="submit" value="注册"> -->
+            <span style="color: red;">{{ errMessages }}</span>
+        </form>
+        <form action="/login/" method="post">
+            <!-- 用户：<input type="text" placeholder="用户名" name="username"> -->
+            请输入密码：<input type="password" placeholder="密码" name="password">
+            
+            <!-- <input type="submit" value="登录">
+            <input type="submit" value="注册"> -->
+            <span style="color: red;">{{ errMessages }}</span>
+        </form>
+        <form action="/login/" method="post">
+            <!-- 用户：<input type="text" placeholder="用户名" name="username"> -->
+            请确认密码：<input type="password" placeholder="密码" name="password">
+            
+            <!-- <input type="submit" value="登录">
+            <input type="submit" value="注册"> -->
             <span style="color: red;">{{ errMessages }}</span>
         </form>
     </body>
